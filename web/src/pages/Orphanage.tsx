@@ -32,6 +32,7 @@ interface OrphanageParams{
 export default function Orphanage() {
   const params = useParams<OrphanageParams>();
   const [orphanage, setOrphanage] = useState<Orphanage>();
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   
     
   useEffect(() => {
@@ -53,12 +54,18 @@ export default function Orphanage() {
 
       <main>
         <div className="orphanage-details">
-          <img src={orphanage.images[0].url} alt={orphanage.name} />
+          <img src={orphanage.images[activeImageIndex].url} alt={orphanage.name} />
 
           <div className="images">
-            {orphanage.images.map(image => {
+            {orphanage.images.map((image, index) => {
               return (
-                <button key={image.id} className="active" type="button">
+                <button key={image.id} 
+                className={activeImageIndex === index ? 'active' : ''} 
+                type="button"
+                onClick={() => {
+                  setActiveImageIndex(index);
+                }}
+                >
                 <img src={image.url} alt={orphanage.name} />
                 </button>
               )
@@ -71,7 +78,7 @@ export default function Orphanage() {
 
             <div className="map-container">
               <Map 
-                center={[-27.2092052,-49.6401092]} 
+                center={[orphanage.latitude, orphanage.longitude]} 
                 zoom={16} 
                 style={{ width: '100%', height: 280 }}
                 dragging={false}
@@ -81,11 +88,11 @@ export default function Orphanage() {
                 doubleClickZoom={false}
               >
                 <TileLayer url="https://a.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
-                <Marker interactive={false} icon={mapIcon} position={[-27.2092052,-49.6401092]} />
+                <Marker interactive={false} icon={mapIcon} position={[orphanage.latitude, orphanage.longitude]} />
               </Map>
 
               <footer>
-                <a href="">Ver rotas no Google Maps</a>
+                <a target="_blank" rel="noopener noreferrer" href={`http://www.google.com/maps/dir/?api=1&destination=${orphanage.latitude},${orphanage.longitude}`}>Ver rotas no Google Maps</a>
               </footer>
             </div>
 
@@ -98,7 +105,9 @@ export default function Orphanage() {
               <div className="hour">
                 <FiClock size={32} color="#15B6D6" />
                 Segunda à Sexta <br />
-                {orphanage.opening_hours ? (
+                {orphanage.opening_hours}
+                </div>
+                {orphanage.open_on_weekends ? (
                    <div className="open-on-weekends">
                    <FiInfo size={32} color="#39CC83" />
                    Atendemos <br />
@@ -107,13 +116,11 @@ export default function Orphanage() {
                 ): (
                   <div className="open-on-weekends dont-open">
                   <FiInfo size={32} color="#FF669D" />
-                  Atendemos <br />
+                  Não atendemos <br />
                   fim de semana
                 </div>
                 )}
-              </div>
-             
-            </div>
+                </div>
 
             <button type="button" className="contact-button">
               <FaWhatsapp size={20} color="#FFF" />
